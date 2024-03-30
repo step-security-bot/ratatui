@@ -16,7 +16,7 @@ use super::Text;
 /// let password = Masked::new("12345", 'x');
 ///
 /// Paragraph::new(password).render(buffer.area, &mut buffer);
-/// assert_eq!(buffer, Buffer::with_lines(vec!["xxxxx"]));
+/// assert_eq!(buffer, Buffer::with_lines(["xxxxx"]));
 /// ```
 #[derive(Default, Clone, Eq, PartialEq, Hash)]
 pub struct Masked<'a> {
@@ -46,14 +46,14 @@ impl<'a> Masked<'a> {
 impl fmt::Debug for Masked<'_> {
     /// Debug representation of a masked string is the underlying string
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.inner)
+        fmt::Display::fmt(&self.inner, f)
     }
 }
 
 impl fmt::Display for Masked<'_> {
     /// Display representation of a masked string is the masked string
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.value())
+        fmt::Display::fmt(&self.value(), f)
     }
 }
 
