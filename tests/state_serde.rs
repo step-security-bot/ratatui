@@ -42,7 +42,11 @@ impl AppState {
 
 /// Renders the list to a `TestBackend` and asserts that the result matches the expected buffer.
 #[track_caller]
-fn assert_buffer<'line, Lines>(state: &mut AppState, expected: Lines) where Lines: IntoIterator, Lines::Item: Into<Line<'line>> {
+fn assert_buffer<'line, Lines>(state: &mut AppState, expected: Lines)
+where
+    Lines: IntoIterator,
+    Lines::Item: Into<Line<'line>>,
+{
     let backend = TestBackend::new(21, 5);
     let mut terminal = Terminal::new(backend).unwrap();
     terminal

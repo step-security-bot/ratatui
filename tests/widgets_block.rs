@@ -42,7 +42,11 @@ fn widgets_block_renders() {
 #[test]
 fn widgets_block_titles_overlap() {
     #[track_caller]
-    fn test_case<'line, Lines>(block: Block, area: Rect, expected: Lines) where Lines: IntoIterator, Lines::Item: Into<ratatui::text::Line<'line>> {
+    fn test_case<'line, Lines>(block: Block, area: Rect, expected: Lines)
+    where
+        Lines: IntoIterator,
+        Lines::Item: Into<ratatui::text::Line<'line>>,
+    {
         let backend = TestBackend::new(area.width, area.height);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal

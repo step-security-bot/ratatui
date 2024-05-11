@@ -2055,7 +2055,10 @@ mod tests {
         #[case] padding: usize,
         #[case] selected: Option<usize>,
         #[case] expected: Lines,
-    )  where Lines: IntoIterator, Lines::Item: Into<Line<'line>>{
+    ) where
+        Lines: IntoIterator,
+        Lines::Item: Into<Line<'line>>,
+    {
         let backend = backend::TestBackend::new(10, render_height);
         let mut terminal = Terminal::new(backend).unwrap();
         let mut state = ListState::default();
