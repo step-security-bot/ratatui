@@ -1968,94 +1968,94 @@ mod tests {
         2, // Offset
         0, // Padding
         Some(2), // Selected
-        Buffer::with_lines([
+        [
             ">> Item 2 ",
             "   Item 3 ",
             "   Item 4 ",
             "   Item 5 ",
-        ])
+        ]
     )]
     #[case::one_before(
         4,
         2, // Offset
         1, // Padding
         Some(2), // Selected
-        Buffer::with_lines([
+        [
             "   Item 1 ",
             ">> Item 2 ",
             "   Item 3 ",
             "   Item 4 ",
-        ])
+        ]
     )]
     #[case::one_after(
         4,
         1, // Offset
         1, // Padding
         Some(4), // Selected
-        Buffer::with_lines([
+        [
             "   Item 2 ",
             "   Item 3 ",
             ">> Item 4 ",
             "   Item 5 ",
-        ])
+        ]
     )]
     #[case::check_padding_overflow(
         4,
         1, // Offset
         2, // Padding
         Some(4), // Selected
-        Buffer::with_lines([
+        [
             "   Item 2 ",
             "   Item 3 ",
             ">> Item 4 ",
             "   Item 5 ",
-        ])
+        ]
     )]
     #[case::no_padding_offset_behavior(
         5, // Render Area Height
         2, // Offset
         0, // Padding
         Some(3), // Selected
-        Buffer::with_lines([
+        [
             "   Item 2 ",
             ">> Item 3 ",
             "   Item 4 ",
             "   Item 5 ",
             "          ",
-        ])
+        ]
     )]
     #[case::two_before(
         5, // Render Area Height
         2, // Offset
         2, // Padding
         Some(3), // Selected
-        Buffer::with_lines([
+        [
             "   Item 1 ",
             "   Item 2 ",
             ">> Item 3 ",
             "   Item 4 ",
             "   Item 5 ",
-        ])
+        ]
     )]
     #[case::keep_selected_visible(
         4,
         0, // Offset
         4, // Padding
         Some(1), // Selected
-        Buffer::with_lines([
+        [
             "   Item 0 ",
             ">> Item 1 ",
             "   Item 2 ",
             "   Item 3 ",
-        ])
+        ]
     )]
-    fn test_padding(
+    fn test_padding<'line, Lines>(
         #[case] render_height: u16,
         #[case] offset: usize,
         #[case] padding: usize,
         #[case] selected: Option<usize>,
-        #[case] expected: Buffer,
-    ) {
+        #[case] expected: Lines,
+    )  where Lines: IntoIterator, Lines::Item: Into<Line<'line>>{
         let backend = backend::TestBackend::new(10, render_height);
         let mut terminal = Terminal::new(backend).unwrap();
         let mut state = ListState::default();
@@ -2072,7 +2072,7 @@ mod tests {
                 f.render_stateful_widget(list, size, &mut state);
             })
             .unwrap();
-        terminal.backend().assert_buffer(&expected);
+        terminal.backend().assert_buffer_lines(expected);
     }
 
     /// If there isn't enough room for the selected item and the requested padding the list can jump

@@ -42,13 +42,13 @@ fn widgets_block_renders() {
 #[test]
 fn widgets_block_titles_overlap() {
     #[track_caller]
-    fn test_case(block: Block, area: Rect, expected: &Buffer) {
+    fn test_case<'line, Lines>(block: Block, area: Rect, expected: Lines) where Lines: IntoIterator, Lines::Item: Into<ratatui::text::Line<'line>> {
         let backend = TestBackend::new(area.width, area.height);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal
             .draw(|frame| frame.render_widget(block, area))
             .unwrap();
-        terminal.backend().assert_buffer(expected);
+        terminal.backend().assert_buffer_lines(expected);
     }
 
     // Left overrides the center
@@ -58,7 +58,7 @@ fn widgets_block_titles_overlap() {
             .title(Title::from("bbb").alignment(Alignment::Center))
             .title(Title::from("ccc").alignment(Alignment::Right)),
         Rect::new(0, 0, 10, 1),
-        &Buffer::with_lines(["aaaaab ccc"]),
+        ["aaaaab ccc"],
     );
 
     // Left alignment overrides the center alignment which overrides the right alignment
@@ -68,7 +68,7 @@ fn widgets_block_titles_overlap() {
             .title(Title::from("bbbbb").alignment(Alignment::Center))
             .title(Title::from("ccccc").alignment(Alignment::Right)),
         Rect::new(0, 0, 11, 1),
-        &Buffer::with_lines(["aaaaabbbccc"]),
+        ["aaaaabbbccc"],
     );
 
     // Multiple left alignment overrides the center alignment and the right alignment
@@ -79,7 +79,7 @@ fn widgets_block_titles_overlap() {
             .title(Title::from("bbbbb").alignment(Alignment::Center))
             .title(Title::from("ccccc").alignment(Alignment::Right)),
         Rect::new(0, 0, 11, 1),
-        &Buffer::with_lines(["aaaaabaaaaa"]),
+        ["aaaaabaaaaa"],
     );
 
     // The right alignment doesn't override the center alignment, but pierces through it
@@ -88,7 +88,7 @@ fn widgets_block_titles_overlap() {
             .title(Title::from("bbbbb").alignment(Alignment::Center))
             .title(Title::from("ccccccccccc").alignment(Alignment::Right)),
         Rect::new(0, 0, 11, 1),
-        &Buffer::with_lines(["cccbbbbbccc"]),
+        ["cccbbbbbccc"],
     );
 }
 
@@ -383,8 +383,7 @@ fn widgets_block_title_alignment_bottom<'line, Lines>(
     terminal
         .draw(|frame| frame.render_widget(block, area))
         .unwrap();
-    let expected = Buffer::with_lines(expected);
-    terminal.backend().assert_buffer(&expected);
+    terminal.backend().assert_buffer_lines(expected);
 }
 
 #[rstest]
@@ -484,6 +483,5 @@ fn widgets_block_multiple_titles<'line, Lines>(
             f.render_widget(block, area);
         })
         .unwrap();
-    let expected = Buffer::with_lines(expected);
-    terminal.backend().assert_buffer(&expected);
+    terminal.backend().assert_buffer_lines(expected);
 }
