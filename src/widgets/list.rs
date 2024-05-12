@@ -31,7 +31,7 @@ use crate::{
 /// # use ratatui::{prelude::*, widgets::*};
 /// # fn ui(frame: &mut Frame) {
 /// # let area = Rect::default();
-/// # let items = vec!["Item 1"];
+/// # let items = ["Item 1"];
 /// let list = List::new(items);
 ///
 /// // This should be stored outside of the function in your application state.
@@ -536,7 +536,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let block = Block::bordered().title("List");
     /// let list = List::new(items).block(block);
     /// ```
@@ -560,7 +560,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).style(Style::new().red().italic());
     /// ```
     ///
@@ -571,7 +571,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).red().italic();
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -590,7 +590,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1", "Item 2"];
+    /// # let items = ["Item 1", "Item 2"];
     /// let list = List::new(items).highlight_symbol(">>");
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -614,7 +614,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1", "Item 2"];
+    /// # let items = ["Item 1", "Item 2"];
     /// let list = List::new(items).highlight_style(Style::new().red().italic());
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -656,7 +656,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).highlight_spacing(HighlightSpacing::Always);
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -678,7 +678,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).direction(ListDirection::BottomToTop);
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -697,7 +697,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).scroll_padding(1);
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -727,7 +727,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).start_corner(Corner::BottomRight);
     /// ```
     ///
@@ -735,7 +735,7 @@ impl<'a> List<'a> {
     ///
     /// ```rust
     /// # use ratatui::{prelude::*, widgets::*};
-    /// # let items = vec!["Item 1"];
+    /// # let items = ["Item 1"];
     /// let list = List::new(items).start_corner(Corner::BottomLeft);
     /// ```
     #[must_use = "method moves the value of self and returns the modified value"]
@@ -1239,22 +1239,32 @@ mod tests {
     #[allow(clippy::too_many_lines)]
     #[test]
     fn test_list_combinations() {
-        fn test_case_render(items: &[ListItem], expected_lines: Vec<&str>) {
+        #[track_caller]
+        fn test_case_render<'line, Lines>(items: &[ListItem], expected: Lines)
+        where
+            Lines: IntoIterator,
+            Lines::Item: Into<Line<'line>>,
+        {
             let list = List::new(items.to_owned()).highlight_symbol(">>");
             let mut buffer = Buffer::empty(Rect::new(0, 0, 10, 5));
             Widget::render(list, buffer.area, &mut buffer);
-            assert_eq!(buffer, Buffer::with_lines(expected_lines));
+            assert_eq!(buffer, Buffer::with_lines(expected));
         }
-        fn test_case_render_stateful(
+
+        #[track_caller]
+        fn test_case_render_stateful<'line, Lines>(
             items: &[ListItem],
             selected: Option<usize>,
-            expected_lines: Vec<&str>,
-        ) {
+            expected: Lines,
+        ) where
+            Lines: IntoIterator,
+            Lines::Item: Into<Line<'line>>,
+        {
             let list = List::new(items.to_owned()).highlight_symbol(">>");
             let mut state = ListState::default().with_selected(selected);
             let mut buffer = Buffer::empty(Rect::new(0, 0, 10, 5));
             StatefulWidget::render(list, buffer.area, &mut buffer, &mut state);
-            assert_eq!(buffer, Buffer::with_lines(expected_lines));
+            assert_eq!(buffer, Buffer::with_lines(expected));
         }
 
         let empty_items = Vec::new();
@@ -1265,7 +1275,7 @@ mod tests {
         // empty list
         test_case_render(
             &empty_items,
-            vec![
+            [
                 "          ",
                 "          ",
                 "          ",
@@ -1276,7 +1286,7 @@ mod tests {
         test_case_render_stateful(
             &empty_items,
             None,
-            vec![
+            [
                 "          ",
                 "          ",
                 "          ",
@@ -1287,7 +1297,7 @@ mod tests {
         test_case_render_stateful(
             &empty_items,
             Some(0),
-            vec![
+            [
                 "          ",
                 "          ",
                 "          ",
@@ -1299,7 +1309,7 @@ mod tests {
         // single item
         test_case_render(
             &single_item,
-            vec![
+            [
                 "Item 0    ",
                 "          ",
                 "          ",
@@ -1310,7 +1320,7 @@ mod tests {
         test_case_render_stateful(
             &single_item,
             None,
-            vec![
+            [
                 "Item 0    ",
                 "          ",
                 "          ",
@@ -1321,7 +1331,7 @@ mod tests {
         test_case_render_stateful(
             &single_item,
             Some(0),
-            vec![
+            [
                 ">>Item 0  ",
                 "          ",
                 "          ",
@@ -1332,7 +1342,7 @@ mod tests {
         test_case_render_stateful(
             &single_item,
             Some(1),
-            vec![
+            [
                 "  Item 0  ",
                 "          ",
                 "          ",
@@ -1344,7 +1354,7 @@ mod tests {
         // multiple items
         test_case_render(
             &multiple_items,
-            vec![
+            [
                 "Item 0    ",
                 "Item 1    ",
                 "Item 2    ",
@@ -1355,7 +1365,7 @@ mod tests {
         test_case_render_stateful(
             &multiple_items,
             None,
-            vec![
+            [
                 "Item 0    ",
                 "Item 1    ",
                 "Item 2    ",
@@ -1366,7 +1376,7 @@ mod tests {
         test_case_render_stateful(
             &multiple_items,
             Some(0),
-            vec![
+            [
                 ">>Item 0  ",
                 "  Item 1  ",
                 "  Item 2  ",
@@ -1377,7 +1387,7 @@ mod tests {
         test_case_render_stateful(
             &multiple_items,
             Some(1),
-            vec![
+            [
                 "  Item 0  ",
                 ">>Item 1  ",
                 "  Item 2  ",
@@ -1388,7 +1398,7 @@ mod tests {
         test_case_render_stateful(
             &multiple_items,
             Some(3),
-            vec![
+            [
                 "  Item 0  ",
                 "  Item 1  ",
                 "  Item 2  ",
@@ -1400,7 +1410,7 @@ mod tests {
         // multi line items
         test_case_render(
             &multi_line_items,
-            vec![
+            [
                 "Item 0    ",
                 "Line 2    ",
                 "Item 1    ",
@@ -1411,7 +1421,7 @@ mod tests {
         test_case_render_stateful(
             &multi_line_items,
             None,
-            vec![
+            [
                 "Item 0    ",
                 "Line 2    ",
                 "Item 1    ",
@@ -1422,7 +1432,7 @@ mod tests {
         test_case_render_stateful(
             &multi_line_items,
             Some(0),
-            vec![
+            [
                 ">>Item 0  ",
                 "  Line 2  ",
                 "  Item 1  ",
@@ -1433,7 +1443,7 @@ mod tests {
         test_case_render_stateful(
             &multi_line_items,
             Some(1),
-            vec![
+            [
                 "  Item 0  ",
                 "  Line 2  ",
                 ">>Item 1  ",
@@ -1459,8 +1469,8 @@ mod tests {
 
     #[test]
     fn test_list_with_empty_strings() {
-        let items = ["Item 0", "", "", "Item 1", "Item 2"];
-        let list = List::new(items).block(Block::bordered().title("List"));
+        let list = List::new(["Item 0", "", "", "Item 1", "Item 2"])
+            .block(Block::bordered().title("List"));
         let buffer = render_widget(list, 10, 7);
         let expected = Buffer::with_lines([
             "┌List────┐",
@@ -1483,8 +1493,7 @@ mod tests {
 
     #[test]
     fn test_list_block() {
-        let items = ["Item 0", "Item 1", "Item 2"];
-        let list = List::new(items).block(Block::bordered().title("List"));
+        let list = List::new(["Item 0", "Item 1", "Item 2"]).block(Block::bordered().title("List"));
         let buffer = render_widget(list, 10, 7);
         let expected = Buffer::with_lines([
             "┌List────┐",
@@ -1500,8 +1509,7 @@ mod tests {
 
     #[test]
     fn test_list_style() {
-        let items = ["Item 0", "Item 1", "Item 2"];
-        let list = List::new(items).style(Style::default().fg(Color::Red));
+        let list = List::new(["Item 0", "Item 1", "Item 2"]).style(Style::default().fg(Color::Red));
         let buffer = render_widget(list, 10, 5);
         let expected = Buffer::with_lines([
             "Item 0    ".red(),
@@ -1535,8 +1543,7 @@ mod tests {
     fn test_list_highlight_spacing_default_whenselected() {
         // when not selected
         {
-            let items = ["Item 0", "Item 1", "Item 2"];
-            let list = List::new(items).highlight_symbol(">>");
+            let list = List::new(["Item 0", "Item 1", "Item 2"]).highlight_symbol(">>");
             let mut state = ListState::default();
             let buffer = render_stateful_widget(list, &mut state, 10, 5);
             let expected = Buffer::with_lines([
@@ -1551,8 +1558,7 @@ mod tests {
 
         // when selected
         {
-            let items = ["Item 0", "Item 1", "Item 2"];
-            let list = List::new(items).highlight_symbol(">>");
+            let list = List::new(["Item 0", "Item 1", "Item 2"]).highlight_symbol(">>");
             let mut state = ListState::default();
             state.select(Some(1));
             let buffer = render_stateful_widget(list, &mut state, 10, 5);
@@ -1662,66 +1668,51 @@ mod tests {
         assert_eq!(buffer, expected);
     }
 
-    #[test]
-    fn test_list_direction_top_to_bottom() {
-        let items = ["Item 0", "Item 1", "Item 2"];
-        let list = List::new(items).direction(ListDirection::TopToBottom);
-        let buffer = render_widget(list, 10, 5);
-        let expected = Buffer::with_lines([
-            "Item 0    ",
-            "Item 1    ",
-            "Item 2    ",
-            "          ",
-            "          ",
-        ]);
-        assert_eq!(buffer, expected);
+    #[rstest]
+    #[case::top_to_bottom(ListDirection::TopToBottom, [
+        "Item 0    ",
+        "Item 1    ",
+        "Item 2    ",
+        "          ",
+    ])]
+    #[case::top_to_bottom(ListDirection::BottomToTop, [
+        "          ",
+        "Item 2    ",
+        "Item 1    ",
+        "Item 0    ",
+    ])]
+    fn list_direction<'line, Lines>(#[case] direction: ListDirection, #[case] expected: Lines)
+    where
+        Lines: IntoIterator,
+        Lines::Item: Into<Line<'line>>,
+    {
+        let list = List::new(["Item 0", "Item 1", "Item 2"]).direction(direction);
+        let buffer = render_widget(list, 10, 4);
+        assert_eq!(buffer, Buffer::with_lines(expected));
     }
 
-    #[test]
-    fn test_list_direction_bottom_to_top() {
-        let items = ["Item 0", "Item 1", "Item 2"];
-        let list = List::new(items).direction(ListDirection::BottomToTop);
-        let buffer = render_widget(list, 10, 5);
-        let expected = Buffer::with_lines([
-            "          ",
-            "          ",
-            "Item 2    ",
-            "Item 1    ",
-            "Item 0    ",
-        ]);
-        assert_eq!(buffer, expected);
-    }
-
-    #[test]
-    fn test_list_start_corner_top_left() {
-        let items = ["Item 0", "Item 1", "Item 2"];
+    #[rstest]
+    #[case::topleft(Corner::TopLeft, [
+        "Item 0    ",
+        "Item 1    ",
+        "Item 2    ",
+        "          ",
+    ])]
+    #[case::bottomleft(Corner::BottomLeft, [
+        "          ",
+        "Item 2    ",
+        "Item 1    ",
+        "Item 0    ",
+    ])]
+    fn start_corner<'line, Lines>(#[case] corner: Corner, #[case] expected: Lines)
+    where
+        Lines: IntoIterator,
+        Lines::Item: Into<Line<'line>>,
+    {
         #[allow(deprecated)] // For start_corner
-        let list = List::new(items).start_corner(Corner::TopLeft);
-        let buffer = render_widget(list, 10, 5);
-        let expected = Buffer::with_lines([
-            "Item 0    ",
-            "Item 1    ",
-            "Item 2    ",
-            "          ",
-            "          ",
-        ]);
-        assert_eq!(buffer, expected);
-    }
-
-    #[test]
-    fn test_list_start_corner_bottom_left() {
-        let items = ["Item 0", "Item 1", "Item 2"];
-        #[allow(deprecated)] // For start_corner
-        let list = List::new(items).start_corner(Corner::BottomLeft);
-        let buffer = render_widget(list, 10, 5);
-        let expected = Buffer::with_lines([
-            "          ",
-            "          ",
-            "Item 2    ",
-            "Item 1    ",
-            "Item 0    ",
-        ]);
-        assert_eq!(buffer, expected);
+        let list = List::new(["Item 0", "Item 1", "Item 2"]).start_corner(corner);
+        let buffer = render_widget(list, 10, 4);
+        assert_eq!(buffer, Buffer::with_lines(expected));
     }
 
     #[test]
@@ -1750,17 +1741,21 @@ mod tests {
     }
 
     #[rstest]
-    #[case(None, vec![
+    #[case(None, [
         "Item 0 with a v",
         "Item 1         ",
         "Item 2         ",
     ])]
-    #[case(Some(0), vec![
+    #[case(Some(0), [
         ">>Item 0 with a",
         "  Item 1       ",
         "  Item 2       ",
     ])]
-    fn test_list_long_lines(#[case] selected: Option<usize>, #[case] expected_lines: Vec<&str>) {
+    fn test_list_long_lines<'line, Lines>(#[case] selected: Option<usize>, #[case] expected: Lines)
+    where
+        Lines: IntoIterator,
+        Lines::Item: Into<Line<'line>>,
+    {
         let items = [
             "Item 0 with a very long line that will be truncated",
             "Item 1",
@@ -1769,7 +1764,7 @@ mod tests {
         let list = List::new(items).highlight_symbol(">>");
         let mut state = ListState::default().with_selected(selected);
         let buffer = render_stateful_widget(list, &mut state, 15, 3);
-        assert_eq!(buffer, Buffer::with_lines(expected_lines));
+        assert_eq!(buffer, Buffer::with_lines(expected));
     }
 
     #[test]
@@ -1860,14 +1855,8 @@ mod tests {
             Line::from("Center").alignment(Alignment::Center),
             Line::from("Right").alignment(Alignment::Right),
         ]);
-        let buffer = render_widget(list, 10, 5);
-        let expected = Buffer::with_lines([
-            "Left      ",
-            "  Center  ",
-            "     Right",
-            "          ",
-            "          ",
-        ]);
+        let buffer = render_widget(list, 10, 4);
+        let expected = Buffer::with_lines(["Left      ", "  Center  ", "     Right", ""]);
         assert_eq!(buffer, expected);
     }
 
@@ -1922,8 +1911,8 @@ mod tests {
     #[test]
     fn test_render_list_alignment_zero_line_width() {
         let list = List::new([Line::from("This line has zero width").alignment(Alignment::Center)]);
-        let buffer = render_widget(list, 0, 5);
-        assert_eq!(buffer, Buffer::with_lines([""; 5]));
+        let buffer = render_widget(list, 0, 2);
+        assert_eq!(buffer, Buffer::with_lines([""; 2]));
     }
 
     #[test]
@@ -1937,29 +1926,23 @@ mod tests {
     #[test]
     fn test_render_list_alignment_line_less_than_width() {
         let list = List::new([Line::from("Small").alignment(Alignment::Center)]);
-        let buffer = render_widget(list, 10, 5);
-        let expected = Buffer::with_lines([
-            "  Small   ",
-            "          ",
-            "          ",
-            "          ",
-            "          ",
-        ]);
+        let buffer = render_widget(list, 10, 2);
+        let expected = Buffer::with_lines(["  Small   ", ""]);
         assert_eq!(buffer, expected);
     }
 
     #[test]
     fn test_render_list_alignment_line_equal_to_width() {
         let list = List::new([Line::from("Exact").alignment(Alignment::Left)]);
-        let buffer = render_widget(list, 5, 3);
-        assert_eq!(buffer, Buffer::with_lines(["Exact", "     ", "     "]));
+        let buffer = render_widget(list, 5, 2);
+        assert_eq!(buffer, Buffer::with_lines(["Exact", ""]));
     }
 
     #[test]
     fn test_render_list_alignment_line_greater_than_width() {
         let list = List::new([Line::from("Large line").alignment(Alignment::Left)]);
-        let buffer = render_widget(list, 5, 3);
-        assert_eq!(buffer, Buffer::with_lines(["Large", "     ", "     "]));
+        let buffer = render_widget(list, 5, 2);
+        assert_eq!(buffer, Buffer::with_lines(["Large", ""]));
     }
 
     #[rstest]
@@ -2121,7 +2104,7 @@ mod tests {
         let mut terminal = Terminal::new(backend).unwrap();
         let mut state = ListState::default().with_offset(0).with_selected(Some(3));
 
-        let items = vec![
+        let items = [
             ListItem::new("Item 0"),
             ListItem::new("Item 1"),
             ListItem::new("Item 2"),
@@ -2158,7 +2141,7 @@ mod tests {
         *state.offset_mut() = 1;
         state.select(Some(2));
 
-        let items = vec![
+        let items = [
             ListItem::new("Item 0\nTest\nTest"),
             ListItem::new("Item 1"),
             ListItem::new("Item 2"),
@@ -2200,7 +2183,7 @@ mod tests {
         #[case] expected: &str,
         mut single_line_buf: Buffer,
     ) {
-        let list = List::new(vec![item]).highlight_symbol(highlight_symbol);
+        let list = List::new([item]).highlight_symbol(highlight_symbol);
         let mut state = ListState::default();
         state.select(Some(0));
         StatefulWidget::render(list, single_line_buf.area, &mut single_line_buf, &mut state);
