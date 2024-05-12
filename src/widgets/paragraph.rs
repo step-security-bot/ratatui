@@ -430,12 +430,11 @@ mod test {
     #[test]
     fn zero_width_char_at_end_of_line() {
         let line = "foo\0";
-        let paragraphs = [
+        for paragraph in [
             Paragraph::new(line),
             Paragraph::new(line).wrap(Wrap { trim: false }),
             Paragraph::new(line).wrap(Wrap { trim: true }),
-        ];
-        for paragraph in paragraphs {
+        ] {
             test_case(&paragraph, &Buffer::with_lines(["foo"]));
             test_case(&paragraph, &Buffer::with_lines(["foo   "]));
             test_case(&paragraph, &Buffer::with_lines(["foo   ", "      "]));
@@ -445,12 +444,11 @@ mod test {
 
     #[test]
     fn test_render_empty_paragraph() {
-        let paragraphs = [
+        for paragraph in [
             Paragraph::new(""),
             Paragraph::new("").wrap(Wrap { trim: false }),
             Paragraph::new("").wrap(Wrap { trim: true }),
-        ];
-        for paragraph in paragraphs {
+        ] {
             test_case(&paragraph, &Buffer::with_lines([" "]));
             test_case(&paragraph, &Buffer::with_lines(["          "]));
             test_case(&paragraph, &Buffer::with_lines(["     "; 10]));
@@ -461,12 +459,11 @@ mod test {
     #[test]
     fn test_render_single_line_paragraph() {
         let text = "Hello, world!";
-        let paragraphs = [
+        for paragraph in [
             Paragraph::new(text),
             Paragraph::new(text).wrap(Wrap { trim: false }),
             Paragraph::new(text).wrap(Wrap { trim: true }),
-        ];
-        for paragraph in paragraphs {
+        ] {
             test_case(&paragraph, &Buffer::with_lines(["Hello, world!  "]));
             test_case(&paragraph, &Buffer::with_lines(["Hello, world!"]));
             test_case(
@@ -483,12 +480,11 @@ mod test {
     #[test]
     fn test_render_multi_line_paragraph() {
         let text = "This is a\nmultiline\nparagraph.";
-        let paragraphs = [
+        for paragraph in [
             Paragraph::new(text),
             Paragraph::new(text).wrap(Wrap { trim: false }),
             Paragraph::new(text).wrap(Wrap { trim: true }),
-        ];
-        for paragraph in paragraphs {
+        ] {
             test_case(
                 &paragraph,
                 &Buffer::with_lines(["This is a ", "multiline ", "paragraph."]),
@@ -596,12 +592,12 @@ mod test {
 
     #[test]
     fn test_render_line_spans_styled() {
-        let l0 = Line::default().spans(vec![
+        let l0 = Line::default().spans([
             Span::styled("bold", Style::new().bold()),
             Span::raw(" and "),
             Span::styled("cyan", Style::new().cyan()),
         ]);
-        let l1 = Line::default().spans(vec![Span::raw("unformatted")]);
+        let l1 = Line::default().spans([Span::raw("unformatted")]);
         let paragraph = Paragraph::new(vec![l0, l1]);
 
         let mut expected = Buffer::with_lines(["bold and cyan", "unformatted"]);
@@ -618,7 +614,6 @@ mod test {
             .title_position(Position::Bottom)
             .title("Title");
         let paragraph = Paragraph::new("Hello, world!").block(block);
-
         test_case(
             &paragraph,
             &Buffer::with_lines(["Hello, world!  ", "Title──────────"]),
@@ -714,9 +709,7 @@ mod test {
         let wrapped_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: false });
         let trimmed_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: true });
 
-        let paragraphs = vec![&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph];
-
-        for paragraph in paragraphs {
+        for paragraph in [&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph] {
             test_case(paragraph, &Buffer::with_lines(["Hello, world!  "]));
             test_case(paragraph, &Buffer::with_lines(["Hello, world!"]));
         }
@@ -739,9 +732,7 @@ mod test {
         let wrapped_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: false });
         let trimmed_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: true });
 
-        let paragraphs = vec![&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph];
-
-        for paragraph in paragraphs {
+        for paragraph in [&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph] {
             test_case(paragraph, &Buffer::with_lines([" Hello, world! "]));
             test_case(paragraph, &Buffer::with_lines(["  Hello, world! "]));
             test_case(paragraph, &Buffer::with_lines(["  Hello, world!  "]));
@@ -766,9 +757,7 @@ mod test {
         let wrapped_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: false });
         let trimmed_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: true });
 
-        let paragraphs = vec![&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph];
-
-        for paragraph in paragraphs {
+        for paragraph in [&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph] {
             test_case(paragraph, &Buffer::with_lines(["  Hello, world!"]));
             test_case(paragraph, &Buffer::with_lines(["Hello, world!"]));
         }
@@ -791,9 +780,7 @@ mod test {
         let wrapped_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: false });
         let trimmed_paragraph = truncated_paragraph.clone().wrap(Wrap { trim: true });
 
-        let paragraphs = vec![&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph];
-
-        for paragraph in paragraphs {
+        for paragraph in [&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph] {
             test_case(
                 paragraph,
                 &Buffer::with_lines(["multiline   ", "paragraph.  ", "            "]),
@@ -814,15 +801,13 @@ mod test {
     #[test]
     fn test_render_paragraph_with_zero_width_area() {
         let text = "Hello, world!";
+        let area = Rect::new(0, 0, 0, 3);
 
-        let paragraphs = vec![
+        for paragraph in [
             Paragraph::new(text),
             Paragraph::new(text).wrap(Wrap { trim: false }),
             Paragraph::new(text).wrap(Wrap { trim: true }),
-        ];
-
-        let area = Rect::new(0, 0, 0, 3);
-        for paragraph in paragraphs {
+        ] {
             test_case(&paragraph, &Buffer::empty(area));
             test_case(&paragraph.clone().scroll((2, 4)), &Buffer::empty(area));
         }
@@ -831,15 +816,13 @@ mod test {
     #[test]
     fn test_render_paragraph_with_zero_height_area() {
         let text = "Hello, world!";
+        let area = Rect::new(0, 0, 10, 0);
 
-        let paragraphs = vec![
+        for paragraph in [
             Paragraph::new(text),
             Paragraph::new(text).wrap(Wrap { trim: false }),
             Paragraph::new(text).wrap(Wrap { trim: true }),
-        ];
-
-        let area = Rect::new(0, 0, 10, 0);
-        for paragraph in paragraphs {
+        ] {
             test_case(&paragraph, &Buffer::empty(area));
             test_case(&paragraph.clone().scroll((2, 4)), &Buffer::empty(area));
         }
@@ -852,12 +835,6 @@ mod test {
             Span::styled("world!", Style::default().fg(Color::Blue)),
         ]);
 
-        let paragraphs = vec![
-            Paragraph::new(text.clone()),
-            Paragraph::new(text.clone()).wrap(Wrap { trim: false }),
-            Paragraph::new(text.clone()).wrap(Wrap { trim: true }),
-        ];
-
         let mut expected_buffer = Buffer::with_lines(["Hello, world!"]);
         expected_buffer.set_style(
             Rect::new(0, 0, 7, 1),
@@ -867,7 +844,12 @@ mod test {
             Rect::new(7, 0, 6, 1),
             Style::default().fg(Color::Blue).bg(Color::Green),
         );
-        for paragraph in paragraphs {
+
+        for paragraph in [
+            Paragraph::new(text.clone()),
+            Paragraph::new(text.clone()).wrap(Wrap { trim: false }),
+            Paragraph::new(text.clone()).wrap(Wrap { trim: true }),
+        ] {
             test_case(
                 &paragraph.style(Style::default().bg(Color::Green)),
                 &expected_buffer,
@@ -878,13 +860,11 @@ mod test {
     #[test]
     fn test_render_paragraph_with_special_characters() {
         let text = "Hello, <world>!";
-        let paragraphs = vec![
+        for paragraph in [
             Paragraph::new(text),
             Paragraph::new(text).wrap(Wrap { trim: false }),
             Paragraph::new(text).wrap(Wrap { trim: true }),
-        ];
-
-        for paragraph in paragraphs {
+        ] {
             test_case(&paragraph, &Buffer::with_lines(["Hello, <world>!"]));
             test_case(&paragraph, &Buffer::with_lines(["Hello, <world>!     "]));
             test_case(
@@ -905,9 +885,7 @@ mod test {
         let wrapped_paragraph = Paragraph::new(text).wrap(Wrap { trim: false });
         let trimmed_paragraph = Paragraph::new(text).wrap(Wrap { trim: true });
 
-        let paragraphs = vec![&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph];
-
-        for paragraph in paragraphs {
+        for paragraph in [&truncated_paragraph, &wrapped_paragraph, &trimmed_paragraph] {
             test_case(paragraph, &Buffer::with_lines(["こんにちは, 世界! 😃"]));
             test_case(
                 paragraph,
