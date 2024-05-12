@@ -14,6 +14,9 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   publish-alpha:
     name: Create an alpha release
@@ -22,8 +25,13 @@ jobs:
       contents: write
     if: ${{ !startsWith(github.event.ref, 'refs/tags/v') }}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
           fetch-depth: 0
 
@@ -31,13 +39,13 @@ jobs:
         run: .github/workflows/calculate-alpha-release.bash
 
       - name: Publish on crates.io
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1.0.3
         with:
           command: publish
           args: --allow-dirty --token ${{ secrets.CARGO_TOKEN }}
 
       - name: Generate a changelog
-        uses: orhun/git-cliff-action@v3
+        uses: orhun/git-cliff-action@8b17108aad4d9362649a5dae020746c2a767c90d # v3.0.2
         with:
           config: cliff.toml
           args: --unreleased --tag ${{ env.NEXT_TAG }} --strip header
@@ -45,7 +53,7 @@ jobs:
           OUTPUT: BODY.md
 
       - name: Publish on GitHub
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
           tag: ${{ env.NEXT_TAG }}
           prerelease: true
@@ -56,11 +64,16 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.event.ref, 'refs/tags/v') }}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
 
       - name: Publish on crates.io
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1.0.3
         with:
           command: publish
           args: --token ${{ secrets.CARGO_TOKEN }}
